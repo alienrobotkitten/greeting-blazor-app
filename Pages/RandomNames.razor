@@ -1,0 +1,45 @@
+﻿@page "/random"
+
+<PageTitle>Create Greeting</PageTitle>
+
+<h1>Get something random!</h1>
+
+<button @onclick="GetPage">Get!</button>
+
+@using Newtonsoft;
+@using Newtonsoft.Json;
+
+@if (resultAsString == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>
+        @foreach (var key in s.Keys)
+        {
+            <b>@key: </b> @s[key] <br />
+        }
+    </p>
+}
+
+@code {
+    HttpClient httpClient { get; set; } = new();
+
+    private string? text { get; set; }
+    private string? resultAsString { get; set; }
+
+    public Dictionary<string, string> s;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetPage();
+    }
+
+    private async Task GetPage()
+    {
+        var result = await httpClient.GetAsync("https://random-data-api.com/api/name/random_name");
+        resultAsString = await result.Content.ReadAsStringAsync();
+        s = JsonConvert.DeserializeObject<Dictionary<string, string>>(resultAsString);
+    }
+}

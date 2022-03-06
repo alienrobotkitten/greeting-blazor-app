@@ -1,0 +1,103 @@
+﻿@page "/inbox"
+
+<PageTitle>Inbox</PageTitle>
+
+<h1>
+    Inbox
+    <button @onclick="GetPage" class="btn btn-primary margin-10">Check inbox</button>
+</h1>
+@if (ErrorMessage != null)
+{
+    <div class="alert alert-warning">@ErrorMessage</div>
+}
+
+@if (greetings == null)
+{
+    <p class="pad-10"><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Timestamp</th>
+                <th>Preview</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var greeting in greetings)
+            {
+                <tr>
+                    <td>
+                        <button class="btn btn-outline-danger"
+                        @onclick=@(e => Delete(greeting.Id))>
+                            <span class="oi oi-trash"
+                          aria-hidden="true">
+                            </span>
+                        </button>
+                    </td>
+                    <td>@greeting.From</td>
+                    <td>@greeting.To</td>
+                    <td>@greeting.Timestamp</td>
+                    <td>
+                        <a href="/view/a/b/@greeting.Id">
+                            @greeting.Preview
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    HttpClient httpClient { get; set; } = new();
+
+    private string? text { get; set; }
+    private string? resultAsString { get; set; }
+    private string? ErrorMessage { get; set; }
+
+    public List<Greeting> greetings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
+        await GetPage();
+    }
+
+    private async Task GetPage()
+    {
+        var result = await httpClient.GetAsync("https://helenatestdev.azurewebsites.net/api/greeting");
+        resultAsString = await result.Content.ReadAsStringAsync();
+        greetings = JsonConvert.DeserializeObject<List<Greeting>>(resultAsString);
+        var comp = new GreetingNewest();
+        greetings.Sort(comp);
+
+        foreach (var g in greetings)
+        {
+            if (g.Message.Length > 40)
+            {
+                g.Preview = $"{g.Message.Substring(0, 38)}...";
+            }
+            else
+            {
+                g.Preview = g.Message;
+            }
+        }
+    }
+
+    private async Task Delete(Guid id)
+    {
+        var result = await httpClient.DeleteAsync($"https://helenatestdev.azurewebsites.net/api/greeting/a/b/{id}");
+        resultAsString = await result.Content.ReadAsStringAsync();
+        if (!result.IsSuccessStatusCode)
+        {
+            ErrorMessage = await result.Content.ReadAsStringAsync();
+        }
+        await GetPage();
+    }
+}

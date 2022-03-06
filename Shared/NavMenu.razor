@@ -1,0 +1,40 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Greeting Service</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        @foreach (var link in Links)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="@link.Route">
+                    <span class="@link.Symbol" aria-hidden="true">
+                    </span> 
+                        @link.Title
+                </NavLink>
+            </div>
+        }
+     </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private BlazorApp.Link[] Links = {
+        new Link("Create greeting","create","oi oi-plus"),
+        new Link("Inbox","inbox","oi oi-list-rich"),
+       // new Link("Random names","random","oi oi-list-rich"),
+    };
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

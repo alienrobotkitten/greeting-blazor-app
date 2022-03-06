@@ -1,0 +1,92 @@
+﻿@page "/view/{a}/{b}/{greetingId}"
+
+<PageTitle>Read greeting</PageTitle>
+
+@using Newtonsoft;
+@using Newtonsoft.Json;
+
+@if (greeting == null)
+{
+    <i> Loading...</i>
+}
+else
+{
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    From:
+                </td>
+                <td>
+                    @greeting.From
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    To:
+                </td>
+                <td>
+                    @greeting.To
+                </td>
+            </tr>
+            <tr>
+                <td>
+                   Received:
+                </td>
+                <td>
+                  @greeting.Timestamp
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan=2>
+                    @greeting.Message
+                </td>
+
+            </tr>
+                        <tr>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan=2>
+                    <a href="/inbox"><button class="btn btn-primary">Go to inbox</button></a>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+    <h4></h4>
+
+}
+
+@code {
+    HttpClient httpClient { get; set; } = new();
+
+    [Parameter]
+    public string? GreetingId { get; set; }
+    [Parameter]
+    public string? A { get; set; }
+    [Parameter]
+    public string? B { get; set; }
+    private string? resultAsString { get; set; }
+
+    public Greeting? greeting { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        GreetingId = GreetingId;
+        A = A;
+        B = B;
+        await GetPage();
+    }
+
+    private async Task GetPage()
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
+        var result = await httpClient.GetAsync($"https://helenatestdev.azurewebsites.net/api/greeting/{A}/{B}/{GreetingId}");
+        resultAsString = await result.Content.ReadAsStringAsync();
+        greeting = JsonConvert.DeserializeObject<Greeting>(resultAsString);
+    }
+}

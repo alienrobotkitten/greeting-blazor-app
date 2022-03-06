@@ -1,0 +1,126 @@
+﻿@page "/create"
+
+<PageTitle>Create Greeting</PageTitle>
+
+<h1>Send a greeting!</h1>
+
+@if (!Sent)
+{
+    <div class="container">
+
+        <table width="80%">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="form-group">
+                            <label for="fromInput">From</label>
+                            <input type="text"
+                               class="form-control"
+                               placeholder="from"
+                               id="fromInput"
+                               @bind=From />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+
+                        <div class="form-group">
+                            <label for="toInput">To</label>
+                            <input type="text"
+                               class="form-control"
+                               placeholder="to"
+                               id="toInput"
+                               @bind=To />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+
+                        <div class="form-group">
+                            <label for="messageField">Message</label>
+                            <textarea id="messageField"
+                                  placeholder="write your message here"
+                                  class="form-control"
+                                  rows="10"
+                                  @bind=Message></textarea>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center">
+
+                        <div class="form-group">
+                            <button type="submit"
+                                class="btn btn-primary" @onclick=Send>
+                                Create
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    @if (Error)
+    {
+        <div class="alert alert-danger">
+            @if (ErrorMessage == null)
+            {
+                <em>Loading...</em>
+            }
+            else
+            {
+                @ErrorMessage
+            }
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-success">
+        <p>Your message was sent!</p>
+        <p>@SuccessMessage</p>
+    </div>
+    <p><a href="/inbox">Go to inbox</a></p>
+    <p><a href="/create">Create another</a></p>
+
+}
+
+@code {
+    public string? From { get; set; }
+    public string? To { get; set; }
+    public string? Message { get; set; }
+    private HttpClient httpClient { get; set; } = new();
+    private Greeting g { get; set; }
+    private bool Sent { get; set; }
+    private bool Error { get; set; }
+    private string? ErrorMessage { get; set; }
+    private string? SuccessMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sent = false;
+        Error = false;
+    }
+
+    private async Task Send()
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
+
+        g = new Greeting(From, To, Message);
+        var result = await httpClient.PostAsJsonAsync<Greeting>($"https://helenatestdev.azurewebsites.net/api/greeting", g);
+
+        if (!result.IsSuccessStatusCode)
+        {
+            Error = true;
+            ErrorMessage = await result.Content.ReadAsStringAsync();
+        }
+        else
+        {
+            Sent = true;
+        }
+    }
+}
