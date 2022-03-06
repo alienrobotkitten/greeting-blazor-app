@@ -19,4 +19,4 @@
 *.vsp
 appsettings.json
 local.settings.json
-*settings.json
+*settings*.json
