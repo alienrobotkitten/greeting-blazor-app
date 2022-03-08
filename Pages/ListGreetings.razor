@@ -1,5 +1,7 @@
 ﻿@page "/"
 @page "/inbox"
+@using BlazorApp.Entities
+@inject NavigationManager NavigationManager
 
 <PageTitle>Inbox</PageTitle>
 
@@ -18,41 +20,52 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>&nbsp;</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Timestamp</th>
-                <th>Preview</th>
-
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var greeting in greetings)
-            {
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
                 <tr>
-                    <td>
-                        <button class="btn btn-outline-danger"
-                        @onclick=@(e => Delete(greeting.Id))>
-                            <span class="oi oi-trash"
-                          aria-hidden="true">
-                            </span>
-                        </button>
-                    </td>
-                    <td>@greeting.From</td>
-                    <td>@greeting.To</td>
-                    <td>@greeting.Timestamp</td>
-                    <td>
-                        <a href="/view/a/b/@greeting.Id">
-                            @greeting.Preview
-                        </a>
-                    </td>
+                    <th scope="col" class="d-md-table-cell">&nbsp;</th>
+                    <th scope="col" class="d-none d-md-table-cell">From</th>
+                    <th scope="col" class="d-none d-md-table-cell">To</th>
+                    <th scope="col" class="d-table-cell">Time</th>
+                    <th scope="col" class="d-table-cell">&nbsp;</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var greeting in greetings)
+                {
+                    <tr @onclick="(e => GoTo(greeting.Id))">
+                        <td class="d-table-cell">
+                            <button class="btn btn-outline-danger"
+                            @onclick=@(e => Delete(greeting.Id)) style="padding: 1px; border: 0;">
+                                <span class="oi oi-circle-x"
+                              aria-hidden="true">
+                                </span>
+                            </button>
+                        </td>
+                        <td class="d-none d-md-table-cell">@greeting.From</td>
+                        <td class="d-none d-md-table-cell">@greeting.To</td>
+                        <td class="d-none d-md-table-cell">@greeting.Timestamp</td>
+                        <td class="d-table-cell d-md-none">
+                            @if (@greeting.Timestamp.Date == DateTime.Now.Date)
+                            {
+                                <span>@greeting.Timestamp.Hour:@greeting.Timestamp.Minute</span>
+                            }
+                            else
+                            {
+                                <span>@greeting.Timestamp.Year-@greeting.Timestamp.Month-@greeting.Timestamp.Day</span>
+                            }
+                        </td>
+                        <td class="d-table-cell">
+
+                            @greeting.Preview
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
@@ -68,6 +81,11 @@ else
     {
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
         await GetPage();
+    }
+
+    private void GoTo(Guid greetingid)
+    {
+        NavigationManager.NavigateTo($"/view/a/b/{greetingid}");
     }
 
     private async Task GetPage()

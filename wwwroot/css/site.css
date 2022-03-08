@@ -3,6 +3,9 @@
 table,tbody,td {
     padding: 10px;
 }
+span:hover  {
+    background-color: white;
+}
 
 .right {
     float: right;
