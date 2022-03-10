@@ -1,5 +1,4 @@
-﻿@page "/"
-@page "/inbox"
+﻿@page "/inbox"
 @using BlazorApp.Entities
 @inject NavigationManager NavigationManager
 
@@ -7,7 +6,6 @@
 
 <h1>
     Inbox
-    <button @onclick="GetPage" class="btn btn-primary margin-10">Check inbox</button>
 </h1>
 @if (ErrorMessage != null)
 {
@@ -34,7 +32,7 @@ else
             <tbody>
                 @foreach (var greeting in greetings)
                 {
-                    <tr @onclick="(e => GoTo(greeting.Id))">
+                    <tr @onclick="(e => read(greeting.Id))">
                         <td class="d-table-cell">
                             <button class="btn btn-outline-danger"
                             @onclick=@(e => Delete(greeting.Id)) style="padding: 1px; border: 0;">
@@ -69,33 +67,18 @@ else
 }
 
 @code {
+
+    [Parameter]
+    public EventCallback<Guid> onGreetingClicked { get; set; }
+    [Parameter]
+    public List<Greeting> greetings { get; set; }
+
     HttpClient httpClient { get; set; } = new();
-
-    private string? text { get; set; }
-    private string? resultAsString { get; set; }
     private string? ErrorMessage { get; set; }
-
-    public List<Greeting> greetings;
 
     protected override async Task OnInitializedAsync()
     {
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
-        await GetPage();
-    }
-
-    private void GoTo(Guid greetingid)
-    {
-        NavigationManager.NavigateTo($"/view/a/b/{greetingid}");
-    }
-
-    private async Task GetPage()
-    {
-        var result = await httpClient.GetAsync("https://helenatestdev.azurewebsites.net/api/greeting");
-        resultAsString = await result.Content.ReadAsStringAsync();
-        greetings = JsonConvert.DeserializeObject<List<Greeting>>(resultAsString);
-        var comp = new GreetingNewest();
-        greetings.Sort(comp);
-
+        greetings = greetings;
         foreach (var g in greetings)
         {
             if (g.Message.Length > 40)
@@ -109,14 +92,18 @@ else
         }
     }
 
+    private async Task read(Guid id)
+    {
+        await onGreetingClicked.InvokeAsync(id);
+    }
+
     private async Task Delete(Guid id)
     {
         var result = await httpClient.DeleteAsync($"https://helenatestdev.azurewebsites.net/api/greeting/a/b/{id}");
-        resultAsString = await result.Content.ReadAsStringAsync();
+        string resultAsString = await result.Content.ReadAsStringAsync();
         if (!result.IsSuccessStatusCode)
         {
             ErrorMessage = await result.Content.ReadAsStringAsync();
         }
-        await GetPage();
     }
 }

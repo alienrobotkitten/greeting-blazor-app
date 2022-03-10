@@ -1,9 +1,6 @@
-﻿@page "/view/{a}/{b}/{greetingId}"
+﻿@page "/view/{greetingId}"
 
 <PageTitle>Read greeting</PageTitle>
-
-@using Newtonsoft;
-@using Newtonsoft.Json;
 
 @if (greeting == null)
 {
@@ -11,7 +8,8 @@
 }
 else
 {
-    <table>
+    <button @onclick="inbox" class="btn btn-primary">Go to inbox</button>
+    <table style="margin-top: 20px; margin-bottom: 20px">
         <tbody>
             <tr>
                 <td>
@@ -31,10 +29,10 @@ else
             </tr>
             <tr>
                 <td>
-                   Received:
+                    Received:
                 </td>
                 <td>
-                  @greeting.Timestamp
+                    @greeting.Timestamp
                 </td>
             </tr>
             <tr>
@@ -46,47 +44,57 @@ else
                 </td>
 
             </tr>
-                        <tr>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td colspan=2>
-                    <a href="/inbox"><button class="btn btn-primary">Go to inbox</button></a>
-                </td>
-
-            </tr>
         </tbody>
     </table>
-    <h4></h4>
+    @if (previousExists)
+    {
+        <span>
+            <button @onclick="prev" class="btn btn-primary" style="float: left;">Previous</button>
+            &nbsp;
+        </span>
+    }
+
+    @if (nextExists)
+    {
+        <span>
+            &nbsp;
+            <button @onclick="next" class="btn btn-primary" style="float: right">Next</button>
+        </span>
+    }
+
 
 }
 
 @code {
-    HttpClient httpClient { get; set; } = new();
 
     [Parameter]
-    public string? GreetingId { get; set; }
+    public EventCallback onPreviousButtonClicked { get; set; }
     [Parameter]
-    public string? A { get; set; }
+    public EventCallback onInboxButtonClicked { get; set; }
     [Parameter]
-    public string? B { get; set; }
-    private string? resultAsString { get; set; }
-
+    public EventCallback onNextButtonClicked { get; set; }
+    [Parameter]
     public Greeting? greeting { get; set; }
+    [Parameter]
+    public bool previousExists { get; set; }
+    [Parameter]
+    public bool nextExists { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        GreetingId = GreetingId;
-        A = A;
-        B = B;
-        await GetPage();
+        greeting = greeting;
     }
 
-    private async Task GetPage()
+    private async void inbox()
     {
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
-        var result = await httpClient.GetAsync($"https://helenatestdev.azurewebsites.net/api/greeting/{A}/{B}/{GreetingId}");
-        resultAsString = await result.Content.ReadAsStringAsync();
-        greeting = JsonConvert.DeserializeObject<Greeting>(resultAsString);
+        await onInboxButtonClicked.InvokeAsync();
+    }
+    private async void prev()
+    {
+        await onPreviousButtonClicked.InvokeAsync();
+    }
+    private async void next()
+    {
+        await onNextButtonClicked.InvokeAsync();
     }
 }
