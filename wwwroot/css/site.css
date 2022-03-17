@@ -1,10 +1,18 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-table,tbody,td {
+table, tbody, td {
     padding: 10px;
 }
-span:hover  {
-    background-color: white;
+
+.delete-btn {
+    opacity: 0.6;
+    border-radius: 100%;
+    color: darkred;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    color: red;
 }
 
 .right {

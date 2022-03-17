@@ -1,10 +1,12 @@
 ﻿@page "/create"
+@inject StateService stateService
+@implements IDisposable
 
 <PageTitle>Create Greeting</PageTitle>
 
 <h1>Send a greeting!</h1>
 
-@if (!Sent)
+@if (!IsSent)
 {
     <div class="container">
 
@@ -16,9 +18,9 @@
                             <label for="fromInput">From</label>
                             <input type="text"
                                class="form-control"
-                               placeholder="from"
+                               placeholder=@From
                                id="fromInput"
-                               @bind=From />
+                               @bind="From" />
                         </div>
                     </td>
                 </tr>
@@ -44,7 +46,7 @@
                                   placeholder="write your message here"
                                   class="form-control"
                                   rows="10"
-                                  @bind=Message></textarea>
+                                  @bind=Message>@From</textarea>
                         </div>
                     </td>
                 </tr>
@@ -64,7 +66,7 @@
         </table>
     </div>
 
-    @if (Error)
+    @if (IsError)
     {
         <div class="alert alert-danger">
             @if (ErrorMessage == null)
@@ -90,37 +92,83 @@ else
 }
 
 @code {
-    public string? From { get; set; }
+    private string _from;
+
+    public string? From
+    {
+        get => _from;
+        set
+        {
+            _from = value;
+            stateService.CurrentUser = value;
+        }
+    }
+
     public string? To { get; set; }
     public string? Message { get; set; }
-    private HttpClient httpClient { get; set; } = new();
-    private Greeting g { get; set; }
-    private bool Sent { get; set; }
-    private bool Error { get; set; }
+
+    private HttpClient HttpClient { get; set; } = new();
+
+    private bool IsSent { get; set; }
+    private bool IsError { get; set; }
     private string? ErrorMessage { get; set; }
     private string? SuccessMessage { get; set; }
 
+    private EventHandler eventHandler;
+
     protected override async Task OnInitializedAsync()
     {
-        Sent = false;
-        Error = false;
+        stateService.OnChange += StateHasChanged;
+        IsSent = false;
+        IsError = false;
+        _from = stateService.CurrentUser;
     }
 
+    private void SetFrom()
+    {
+        stateService.CurrentUser = From;
+    }
     private async Task Send()
     {
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
+        HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
 
-        g = new Greeting(From, To, Message);
-        var result = await httpClient.PostAsJsonAsync<Greeting>($"https://helenatestdev.azurewebsites.net/api/greeting", g);
+        ErrorMessage = "";
 
-        if (!result.IsSuccessStatusCode)
+        if (From == null)
         {
-            Error = true;
-            ErrorMessage = await result.Content.ReadAsStringAsync();
+            IsError = true;
+            ErrorMessage += "From field can't be empty. <br/> ";
         }
-        else
+        if (To == null)
         {
-            Sent = true;
+            IsError = true;
+            ErrorMessage += "To field can't be empty. <br/> ";
         }
+        if (Message == null)
+        {
+            IsError = true;
+            ErrorMessage += "Do you really want to send an empty message? <br/>";
+        }
+
+        if (From != null && To != null && Message != null)
+        {
+            IsError = false;
+            Greeting g = new Greeting(From, To, Message);
+            var result = await HttpClient.PostAsJsonAsync<Greeting>($"https://helenatestdev.azurewebsites.net/api/greeting", g);
+
+            if (!result.IsSuccessStatusCode)
+            {
+                IsError = true;
+                ErrorMessage = await result.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                IsSent = true;
+            }
+        }
+    }
+    public void Dispose()
+    {
+        stateService.OnChange -= StateHasChanged;
     }
 }

@@ -1,0 +1,76 @@
+﻿@using BlazorApp.Entities
+
+<PageTitle>@ThisFolder</PageTitle>
+
+@switch (CurrentView)
+{
+    case View.ViewGreeting:
+        <ReadGreeting onPreviousButtonClicked="Previous"
+              onInboxButtonClicked="List"
+              onNextButtonClicked="Next"
+              previousExists=@PreviousExists
+              nextExists=@NextExists
+              greeting=@CurrentGreeting />
+        break;
+    case View.ListGreetings:
+    default:
+        <ListGreetings onGreetingClicked="ShowGreeting"
+               greetings=@GreetingList />
+        break;
+}
+
+
+@code {
+
+    [Parameter]
+    public Folder ThisFolder { get; set; }
+
+    [Parameter]
+    public List<Greeting> GreetingList { get; set; }
+
+    private View CurrentView { get; set; }
+
+    public Greeting? CurrentGreeting { get; set; }
+    private bool PreviousExists { get; set; }
+    private bool NextExists { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var comp = new GreetingNewest();
+        GreetingList.Sort(comp);
+        CurrentView = View.ListGreetings;
+    }
+
+    private void ShowGreeting(Guid id)
+    {
+        CurrentGreeting = GreetingList.Find(x => x.Id == id);
+
+        int index = GreetingList.IndexOf(CurrentGreeting);
+        CurrentGreeting = GreetingList.ElementAt(index);
+        PreviousExists = index > 0;
+        NextExists = index < GreetingList.Count - 2;
+
+        CurrentView = View.ViewGreeting;
+    }
+
+    private void List()
+    {
+        CurrentView = View.ListGreetings;
+    }
+
+    private void Previous()
+    {
+        int index = GreetingList.IndexOf(CurrentGreeting) - 1;
+        CurrentGreeting = GreetingList.ElementAt(index);
+        PreviousExists = index > 0;
+        NextExists = true;
+    }
+
+    private void Next()
+    {
+        int index = GreetingList.IndexOf(CurrentGreeting) + 1;
+        CurrentGreeting = GreetingList.ElementAt(index);
+        PreviousExists = true;
+        NextExists = index < GreetingList.Count - 1;
+    }
+}

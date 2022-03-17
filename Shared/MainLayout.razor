@@ -1,4 +1,9 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject StateService stateService
+@using BlazorApp.Entities;
+@using BlazorApp.Pages;
+@using BlazorApp.Shared;
 
 <PageTitle>BlazorApp</PageTitle>
 
@@ -9,7 +14,18 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <form>
+                UseR: 
+                <select @bind="stateService.CurrentUser">
+                    @foreach (string o in UserList)
+                    {
+                        <option>
+                            @o
+                        </option>
+                    }
+
+                </select>
+            </form>
         </div>
 
         <article class="content px-4">
@@ -17,3 +33,16 @@
         </article>
     </main>
 </div>
+@code {
+    private List<string> UserList { get; set; } = new() { "kajsa@ankeborg.com", "kalle@ankeborg.com","musse@ankeborg.com","mimmi@ankeborg.com","joakim@ankeborg.com"};
+
+    protected override void OnInitialized()
+    {
+        stateService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        stateService.OnChange -= StateHasChanged;
+    }
+}
