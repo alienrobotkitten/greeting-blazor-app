@@ -18,35 +18,54 @@ else
 @code {
 
     public List<Greeting> GreetingList { get; set; }
+    private List<Greeting> completeList;
 
     private HttpClient HttpClient { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        stateService.OnChange += StateHasChanged;
+        stateService.OnChange += FilterGreetings;
 
         HttpClient = new();
         HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
 
         await GetPage();
     }
+    private void FilterGreetings()
+    {
+        GreetingList = FilterGreetings(stateService.CurrentUser);
+        StateHasChanged();
+    }
+
+    private List<Greeting> FilterGreetings(string userName)
+    {
+
+        var filteredItems = from g in completeList
+            where g.To == stateService.CurrentUser
+            select g;
+        var filteredList = filteredItems.ToList();
+        var comp = new GreetingNewest();
+        filteredList.Sort(comp);
+        return filteredList;
+    }
 
     private async Task GetPage()
     {
         var result = await HttpClient.GetAsync("https://helenatestdev.azurewebsites.net/api/greeting");
         var resultAsString = await result.Content.ReadAsStringAsync();
-        var rawList = JsonConvert.DeserializeObject<List<Greeting>>(resultAsString);
-        var temp = from g in rawList 
-            where g.From == stateService.CurrentUser 
-            select g;
-        GreetingList = temp.ToList();
-        var comp = new GreetingNewest();
-        GreetingList.Sort(comp);
+        try
+        {
+            completeList = JsonConvert.DeserializeObject<List<Greeting>>(resultAsString);
+            GreetingList = FilterGreetings(stateService.CurrentUser);
+        }
+        catch (Exception)
+        {
+            GreetingList = null;
+        }
     }
 
     public void Dispose()
     {
-        stateService.OnChange -= StateHasChanged;
+        stateService.OnChange -= FilterGreetings;
     }
-
 }

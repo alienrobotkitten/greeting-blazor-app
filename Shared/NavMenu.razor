@@ -2,7 +2,10 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Greet<span style="color: lightcoral">R</span></a>
+        <a class="navbar-brand" href="">
+            <span style="float: start"><img src="/img/logo/favicon-32x32.png" width="32" /></span>
+            <span style="float: end">Greet<span style="color: #825">R</span></span>
+        </a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -18,15 +21,15 @@
                 Create greeting
             </NavLink>
         </div>
-        <div class="nav-item px-3" href="/inbox">
-            <NavLink class="nav-link">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/inbox">
                 <span class="oi oi-list-rich" aria-hidden="true">
                 </span>
                 Inbox
             </NavLink>
         </div>
-        <div class="nav-item px-3" href="/sentitems">
-            <NavLink class="nav-link">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/sentitems">
                 <span class="oi oi-list-rich" aria-hidden="true">
                 </span>
                 Sent items

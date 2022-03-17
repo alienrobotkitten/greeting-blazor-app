@@ -16,11 +16,11 @@
                     <td>
                         <div class="form-group">
                             <label for="fromInput">From</label>
-                            <input type="text"
-                               class="form-control"
-                               placeholder=@From
-                               id="fromInput"
-                               @bind="From" />
+                            <input value="@stateService.CurrentUser"
+                                   type="text"
+                                   class="form-control"
+                                   id="fromInput"
+                                   disabled="disabled"/>
                         </div>
                     </td>
                 </tr>
@@ -46,7 +46,7 @@
                                   placeholder="write your message here"
                                   class="form-control"
                                   rows="10"
-                                  @bind=Message>@From</textarea>
+                                  @bind=Message/>
                         </div>
                     </td>
                 </tr>
@@ -114,8 +114,6 @@ else
     private string? ErrorMessage { get; set; }
     private string? SuccessMessage { get; set; }
 
-    private EventHandler eventHandler;
-
     protected override async Task OnInitializedAsync()
     {
         stateService.OnChange += StateHasChanged;
@@ -124,10 +122,6 @@ else
         _from = stateService.CurrentUser;
     }
 
-    private void SetFrom()
-    {
-        stateService.CurrentUser = From;
-    }
     private async Task Send()
     {
         HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", "a2Fqc2FAYW5rZWJvcmcuY29tOnRlc3Q=");
@@ -137,17 +131,17 @@ else
         if (From == null)
         {
             IsError = true;
-            ErrorMessage += "From field can't be empty. <br/> ";
+            ErrorMessage += "From field can't be empty.\n";
         }
         if (To == null)
         {
             IsError = true;
-            ErrorMessage += "To field can't be empty. <br/> ";
+            ErrorMessage += "To field can't be empty.\n";
         }
         if (Message == null)
         {
             IsError = true;
-            ErrorMessage += "Do you really want to send an empty message? <br/>";
+            ErrorMessage += "Do you really want to send an empty message?";
         }
 
         if (From != null && To != null && Message != null)

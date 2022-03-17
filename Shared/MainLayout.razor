@@ -8,24 +8,21 @@
 <PageTitle>BlazorApp</PageTitle>
 
 <div class="page">
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <NavMenu />
     </div>
 
     <main>
         <div class="top-row px-4">
-            <form>
-                UseR: 
-                <select @bind="stateService.CurrentUser">
-                    @foreach (string o in UserList)
-                    {
-                        <option>
-                            @o
-                        </option>
-                    }
-
-                </select>
-            </form>
+            UseR:
+            <select @bind="stateService.CurrentUser">
+                @foreach (string user in UserList)
+                {
+                    <option value="@user">
+                        @user
+                    </option>
+                }
+            </select>
         </div>
 
         <article class="content px-4">
@@ -34,7 +31,7 @@
     </main>
 </div>
 @code {
-    private List<string> UserList { get; set; } = new() { "kajsa@ankeborg.com", "kalle@ankeborg.com","musse@ankeborg.com","mimmi@ankeborg.com","joakim@ankeborg.com"};
+    private List<string> UserList { get; set; } = new() { "kajsa@ankeborg.com", "kalle@ankeborg.com", "musse@ankeborg.com", "mimmi@ankeborg.com", "joakim@ankeborg.com" };
 
     protected override void OnInitialized()
     {
