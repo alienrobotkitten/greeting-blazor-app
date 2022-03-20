@@ -14,15 +14,7 @@
 
     <main>
         <div class="top-row px-4">
-            UseR:
-            <select @bind="stateService.CurrentUser">
-                @foreach (string user in UserList)
-                {
-                    <option value="@user">
-                        @user
-                    </option>
-                }
-            </select>
+<a href="/about">About</a>
         </div>
 
         <article class="content px-4">
@@ -31,7 +23,6 @@
     </main>
 </div>
 @code {
-    private List<string> UserList { get; set; } = new() { "kajsa@ankeborg.com", "kalle@ankeborg.com", "musse@ankeborg.com", "mimmi@ankeborg.com", "joakim@ankeborg.com" };
 
     protected override void OnInitialized()
     {

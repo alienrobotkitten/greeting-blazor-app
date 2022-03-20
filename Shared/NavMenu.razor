@@ -1,4 +1,6 @@
 ﻿@using BlazorApp.Entities
+@implements IDisposable
+@inject StateService stateService
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -14,6 +16,19 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link">
+                <select @bind="stateService.CurrentUser">
+                    @foreach (string user in UserList)
+                    {
+                        <option value="@user">
+                            @user
+                        </option>
+                    }
+                </select>
+            </NavLink>
+
+        </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/create">
                 <span class="oi oi-plus" aria-hidden="true">
@@ -43,8 +58,20 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    private List<string> UserList { get; set; } = new() { "kajsa@ankeborg.com", "kalle@ankeborg.com", "musse@ankeborg.com", "mimmi@ankeborg.com", "joakim@ankeborg.com" };
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override void OnInitialized()
+    {
+        stateService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        stateService.OnChange -= StateHasChanged;
     }
 }
