@@ -1,9 +1,7 @@
 ﻿@using BlazorApp.Entities
 
-<PageTitle>Inbox</PageTitle>
-
 <h1>
-    Inbox
+    @foldername
 </h1>
 @if (ErrorMessage != null)
 {
@@ -21,8 +19,14 @@ else
             <thead>
                 <tr>
                     <th scope="col" class="d-md-table-cell">&nbsp;</th>
-                    <th scope="col" class="d-none d-md-table-cell">From</th>
-                    <th scope="col" class="d-none d-md-table-cell">To</th>
+                    @if (@foldername == Folder.Inbox)
+                    {
+                        <th scope="col" class="d-none d-md-table-cell">From</th>
+                    }
+                    @if (@foldername == Folder.Sent)
+                    {
+                        <th scope="col" class="d-none d-md-table-cell">To</th>
+                    }
                     <th scope="col" class="d-table-cell">Time</th>
                     <th scope="col" class="d-table-cell">&nbsp;</th>
                 </tr>
@@ -39,8 +43,14 @@ else
                                 </span>
                             </button>
                         </td>
-                        <td class="d-none d-md-table-cell">@greeting.From</td>
-                        <td class="d-none d-md-table-cell">@greeting.To</td>
+                        @if (@foldername == Folder.Inbox)
+                        {
+                            <td class="d-none d-md-table-cell">@greeting.From</td>
+                        }
+                        @if (@foldername == Folder.Sent)
+                        {
+                            <td class="d-none d-md-table-cell">@greeting.To</td>
+                        }
                         <td class="d-none d-md-table-cell">@greeting.Timestamp</td>
                         <td class="d-table-cell d-md-none">
                             @if (@greeting.Timestamp.Date == DateTime.Now.Date)
@@ -70,6 +80,8 @@ else
     public EventCallback<Guid> onGreetingClicked { get; set; }
     [Parameter]
     public List<Greeting> greetings { get; set; }
+    [Parameter]
+    public Folder foldername { get; set; }
 
     HttpClient httpClient { get; set; } = new();
     private string? ErrorMessage { get; set; }
@@ -77,17 +89,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         greetings = greetings;
-        foreach (var g in greetings)
-        {
-            if (g.Message.Length > 40)
-            {
-                g.Preview = $"{g.Message.Substring(0, 38)}...";
-            }
-            else
-            {
-                g.Preview = g.Message;
-            }
-        }
     }
 
     private async Task read(Guid id)

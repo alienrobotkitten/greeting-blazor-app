@@ -42,9 +42,22 @@ else
     private List<Greeting> FilterGreetings(string userName)
     {
         var filteredItems = from g in completeList
-            where g.To == stateService.CurrentUser
-            select g;
+                            where g.To == stateService.CurrentUser
+                            select g;
         var filteredList = filteredItems.ToList();
+
+        foreach (var g in filteredList)
+        {
+            if (g.Message.Length > 40)
+            {
+                g.Preview = $"{g.Message.Substring(0, 38)}...";
+            }
+            else
+            {
+                g.Preview = g.Message;
+            }
+        }
+
         var comp = new GreetingNewest();
         filteredList.Sort(comp);
         return filteredList;
@@ -57,6 +70,8 @@ else
         try
         {
             completeList = JsonConvert.DeserializeObject<List<Greeting>>(resultAsString);
+
+
             GreetingList = FilterGreetings(stateService.CurrentUser);
         }
         catch (Exception)
